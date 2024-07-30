@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+samples/
+
+counts.csv
+
 # C extensions
 *.so
 
