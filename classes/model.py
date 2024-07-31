@@ -35,6 +35,10 @@ class MODEL:
             except Exception as e:
                 print(f"Error occurred: {e}")
             destroyAllWindows()
+        elif self.__model is None:
+            print("No model detected. Mount a model first using `MODEL.mount(your_model)`")
+        else:
+            print("Operation unsupported for the mounted model.")
 
     def __dump(self, counts: dict) -> None:
         classes = self.__model.names
@@ -102,3 +106,7 @@ class MODEL:
                 
             except Exception as e:
                 print(f"Error occurred: {e}")
+        elif self.__model is None:
+            print("No model detected. Mount a model first using `MODEL.mount(your_model)`")
+        else:
+            print("Operation unsupported for the mounted model.")
