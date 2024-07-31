@@ -61,7 +61,7 @@ class MODEL:
                     for direction in keys:
                         print(f"{cls.capitalize()} ({direction}) = {val[direction]}")
 
-    def count(self, source: str = "0", skip: int = 1, region_points: list = [], resolution: tuple = (1280, 720)) -> int:
+    def count(self, source: str = "0", skip: int = 1, region_points: list = [], resolution: tuple = (1280, 720)) -> None:
         if isinstance(self.__model, YOLO):
             try:
                 frame_width, frame_height = resolution
@@ -86,7 +86,7 @@ class MODEL:
                     success, im0 = capture.read()
                     if not success:
                         break
-                    tracks = self.__model.track(im0, persist=True, show=False, verbose=False)
+                    tracks = self.__model.track(im0, persist=True, show=False, verbose=False, view_img=False)
                     im0 = object_counter.start_counting(im0, tracks)
 
                     new_classwise_count = object_counter.class_wise_count
