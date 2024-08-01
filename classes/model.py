@@ -4,7 +4,12 @@ from ultralytics import YOLO, solutions
 from ultralytics.solutions import ObjectCounter
 from cv2 import imshow, waitKey, destroyAllWindows, VideoCapture
 from cv2 import CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT, CAP_PROP_POS_FRAMES
+import streamlit as st
 
+config = st.set_page_config(
+    page_title="Object Counter",
+    page_icon="🚗"
+    )
 class MODEL:
     __model = None
     
@@ -86,8 +91,11 @@ class MODEL:
                     success, im0 = capture.read()
                     if not success:
                         break
-                    tracks = self.__model.track(im0, persist=True, show=False, verbose=False, view_img=False)
+                    tracks = self.__model.track(im0, persist=True, show=False, verbose=False)
                     im0 = object_counter.start_counting(im0, tracks)
+
+                    # updt the frame in session state
+                    st.session_state.frame_bucket.image(im0, channels="BGR")
 
                     new_classwise_count = object_counter.class_wise_count
 
