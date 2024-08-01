@@ -1,7 +1,7 @@
 import base64
 import streamlit as st
 
-@st.cache_data(allow_output_mutation=True)
+@st.cache_data()
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
         data = f.read()

@@ -6,10 +6,6 @@ from cv2 import imshow, waitKey, destroyAllWindows, VideoCapture
 from cv2 import CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT, CAP_PROP_POS_FRAMES
 import streamlit as st
 
-config = st.set_page_config(
-    page_title="Object Counter",
-    page_icon="🚗"
-    )
 class MODEL:
     __model = None
     
@@ -66,7 +62,7 @@ class MODEL:
                     for direction in keys:
                         print(f"{cls.capitalize()} ({direction}) = {val[direction]}")
 
-    def count(self, source: str = "0", skip: int = 1, region_points: list = [], resolution: tuple = (1280, 720)) -> None:
+    def count(self, source: str = "0", skip: int = 1, region_points: list = [], resolution: tuple = (1280, 720), show_vid: bool = False) -> None:
         if isinstance(self.__model, YOLO):
             try:
                 frame_width, frame_height = resolution
@@ -77,7 +73,7 @@ class MODEL:
                 capture.set(CAP_PROP_FRAME_HEIGHT, frame_height)
                 
                 object_counter = ObjectCounter(
-                    view_img=True,
+                    view_img=show_vid,
                     reg_pts=region_points,
                     classes_names=self.__model.names,
                     draw_tracks=True,
