@@ -2,6 +2,7 @@
 import os
 import streamlit as st
 import cv2
+from utils import background_setter
 
 video_path = r"C:\Users\Fayyez.Farrukh\Documents\NPI\Og videos\002.mp4"
 
@@ -12,6 +13,7 @@ def main(_args):
         st.error("Error opening video stream or file")
     frame_bucket = st.empty()
     # open video
+    background_setter.set_png_as_page_bg("assets/joker_bkg.png")
     while cap.isOpened():
 
         ret, frame = cap.read()
