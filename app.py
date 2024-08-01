@@ -4,6 +4,7 @@ import streamlit as st
 import cv2
 from classes.model import MODEL
 from ultralytics import YOLO
+from utils import background_setter
 
 video_path = r"C:\Users\Fayyez.Farrukh\Documents\NPI\Og videos\002.mp4"
 
