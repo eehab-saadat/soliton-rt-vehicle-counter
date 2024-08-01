@@ -5,6 +5,7 @@ from ultralytics import YOLO
 from utils.background_setter import set_png_as_page_bg
 from streamlit_option_menu import option_menu
 import cv2
+import tempfile
 
 # Mounting model
 video_path = r"C:\Users\Fayyez.Farrukh\Documents\NPI\Og videos\002.mp4"
@@ -19,8 +20,11 @@ def main(_args):
     def on_upload() -> None:
         if st.session_state.get("uploaded_file") is not None: # if a file is uploaded
             video_file = st.session_state.uploaded_file
-            print(video_file)
-            
+            # model.count(src=video_file.upload_url)
+            # create a temporary copy of the uploaded file in storage folder
+            with tempfile.NamedTemporaryFile(delete=False, suffix=video_file.name.split(".")[-1]) as temp:
+                temp.write(video_file.read())
+                model.count(temp.name, 1, linear_points)
             
         else:
             print("file not uploaed")
@@ -52,10 +56,15 @@ def main(_args):
         st.session_state.uploaded_file = uploaded_file
         
     if selected == "With IP Address":
-        st.write("Enter your IP Address")
+        IP_address = st.text_input("Enter IP Address", "")
+        run_stream_button = st.button("Run", 
+                                      help="Run the model inference and start counting vehicles from netwrook camera input",
+                                      key="run_btn",
+                                      on_click=lambda: model.count("http://" + IP_address, 1, linear_points))
     if selected == "Use Webcam":
-        st.write("Use your webcam")
+        model.count(skip=2, region_points=linear_points)
 
+    st.session_state.frame_bucket = st.empty()
     ## page routing
     # page1 = st.Page("classes/model.py")
     # router = st.navigation(pages=[page1])
