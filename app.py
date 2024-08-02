@@ -106,9 +106,13 @@ def main(_args):
                                             help="Run the model inference and start counting vehicles from selected camera input",
                                             key="run_cam_btn",
                                             on_click=handle_camera_stream)
-            
-    st.session_state.frame_bucket = st.empty()
-    if "display_checkbox" in st.sess
+                
+    # container declaration for video streaming
+    if st.session_state.main_pane_cols == 2:
+          with main_pane[1]:
+            st.session_state.frame_bucket = st.empty()
+            st.session_state.frame_bucket.image(image="assets/placeholder-bg.png")
+
     ## page routing
     # page1 = st.Page("classes/model.py")
     # router = st.navigation(pages=[page1])
