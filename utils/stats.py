@@ -1,10 +1,19 @@
 import streamlit as st
-import pandas as pd
+from pandas import DataFrame
 import matplotlib.pyplot as plt
-from streamlit_theme import st_theme
+from streamlit_theme  import set_theme
+
+def get_theme():
+    theme = set_theme()
+    if theme is None:
+        theme = {
+            "backgroundColor": "#FFFFFF",
+            "textColor": "#000000"
+        }
+    return theme
 
 @st.cache_data()
-def draw_chart(data: pd.DataFrame, theme: dict):
+def draw_chart(data: DataFrame, theme: dict):
     fig, ax = plt.subplots()
     fig.patch.set_facecolor(theme["backgroundColor"])
     wedges, texts, autotexts = ax.pie(data["counts"], labels=data["class"], autopct='%1.1f%%', startangle=90)
@@ -13,9 +22,9 @@ def draw_chart(data: pd.DataFrame, theme: dict):
         text.set_color(theme["textColor"])
     return fig
 
-def render_statistics():
-    data = pd.read_csv("counts.csv")
-    tabs = st.tabs(["✉️ Table", "📈 Visualization"])
+@st.cache_data()
+def render_statistics(data: DataFrame, theme: dict = lambda: get_theme()):
+    tabs = st.tabs(["📝 Table", "📈 Visualization"])
 
     with tabs[0]:
         st.dataframe(data, use_container_width=True, hide_index=True)
@@ -27,17 +36,8 @@ def render_statistics():
         series = data["counts"].values.tolist()
 
         with layout[0]:
-            theme = st_theme()
-            if theme is None:
-                theme = {
-                    "backgroundColor": "#FFFFFF",
-                    "textColor": "#000000"
-                }
-                
             fig = draw_chart(data, theme)
             st.pyplot(fig)
 
         with layout[1]:
             st.bar_chart(data, x="class", y="counts")
-
-render_statistics()

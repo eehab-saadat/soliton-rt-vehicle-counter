@@ -4,13 +4,14 @@ import streamlit as st
 # from ultralytics import YOLO
 from utils.background_setter import set_png_as_page_bg
 from streamlit_option_menu import option_menu
-import cv2
-import tempfile
 from utils.onlycams import list_hot_cameras_on_my_device
 from utils.upload import on_upload
 from utils.camera import handle_camera_stream
 from utils.main_layout import handle_show_vid
 from datetime import datetime
+from utils.stats import render_statistics
+from pandas import read_csv, DataFrame
+
 ## Mounting model
 # video_path = r"C:\Users\Fayyez.Farrukh\Documents\NPI\Og videos\002.mp4"
 # model = MODEL()
@@ -112,6 +113,11 @@ def main(_args):
           with main_pane[1]:
             st.session_state.frame_bucket = st.empty()
             st.session_state.frame_bucket.image(image="assets/placeholder-bg.png")
+
+    # rendering data vidualization
+    data_for_visualization = read_csv("counts.csv")
+    render_statistics(data_for_visualization)
+
 
     ## page routing
     # page1 = st.Page("classes/model.py")
