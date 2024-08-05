@@ -14,4 +14,5 @@ def on_upload() -> None:
         
     else:
         # TODO: show error message popup
-        showDialogBox(header="Upload Error", message="File not uploaded properly. file not present, incompatible format or file size > 200mb")
+        showDialogBox(heading="Upload Error", 
+                      message="File not uploaded properly. file not present, incompatible format or file size > 200mb.")
