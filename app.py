@@ -115,8 +115,7 @@ def main(_args):
             st.session_state.frame_bucket.image(image="assets/placeholder-bg.png")
 
     # rendering data vidualization
-    data_for_visualization = read_csv("counts.csv")
-    render_statistics(data_for_visualization)
+    render_statistics()
 
 
     ## page routing

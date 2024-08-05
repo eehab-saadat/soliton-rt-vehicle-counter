@@ -1,20 +1,21 @@
 import streamlit as st
-from pandas import DataFrame
+from pandas import DataFrame, read_csv
 import matplotlib.pyplot as plt
-from streamlit_theme  import set_theme
+from streamlit_theme import st_theme
 
 def get_theme():
-    theme = set_theme()
+    theme = st_theme()
     if theme is None:
         theme = {
-            "backgroundColor": "#FFFFFF",
+            "backgroundColor": "#ffffff",
             "textColor": "#000000"
         }
     return theme
 
-@st.cache_data()
+@st.cache_data
 def draw_chart(data: DataFrame, theme: dict):
     fig, ax = plt.subplots()
+    print("theme is:", theme, "\n\n\n")
     fig.patch.set_facecolor(theme["backgroundColor"])
     wedges, texts, autotexts = ax.pie(data["counts"], labels=data["class"], autopct='%1.1f%%', startangle=90)
     ax.axis('equal')
@@ -22,22 +23,24 @@ def draw_chart(data: DataFrame, theme: dict):
         text.set_color(theme["textColor"])
     return fig
 
-@st.cache_data()
-def render_statistics(data: DataFrame, theme: dict = lambda: get_theme()):
+@st.fragment(run_every=10)
+def render_statistics():
+    st.session_state.data_for_visualization = read_csv("counts.csv")
+    # get the current system theme
+    theme = get_theme()
+    # create tabs
     tabs = st.tabs(["📝 Table", "📈 Visualization"])
 
     with tabs[0]:
-        st.dataframe(data, use_container_width=True, hide_index=True)
+        st.dataframe(st.session_state.data_for_visualization, use_container_width=True, hide_index=True)
 
     with tabs[1]:
         
         layout = st.columns(2)
 
-        series = data["counts"].values.tolist()
-
         with layout[0]:
-            fig = draw_chart(data, theme)
+            fig = draw_chart(st.session_state.data_for_visualization, theme)
             st.pyplot(fig)
 
         with layout[1]:
-            st.bar_chart(data, x="class", y="counts")
+            st.bar_chart(st.session_state.data_for_visualization, x="class", y="counts")
