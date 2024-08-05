@@ -48,6 +48,15 @@ def main(_args):
         else:
             st.session_state.main_pane_cols = 1
 
+    st.markdown('''<h1 style='text-align: center; color: white; font-style: italic; font-size: 56px; margin:0'>
+                    🎁 Autoistics
+                </h1>
+                <h3 style='text-align: center; color: white; font-style: italic; font-size: 24px; margin:0'>
+                    Specially Abled Vehicle Counter
+                </h3>
+                <br>
+                ''', unsafe_allow_html=True)
+
     main_pane = st.columns(st.session_state.main_pane_cols, vertical_alignment="top", gap='small')
     st.session_state.main_pane = main_pane
 
@@ -55,7 +64,7 @@ def main(_args):
 
         header_row = st.columns(spec=[4,1], gap="small", vertical_alignment="center")
         with header_row[0]:
-            st.header("Vehicle Detection")
+            st.header("Control Panel")
         with header_row[1]:
             display_checkbox = st.checkbox(label="Show Video", key="show_vid", on_change=handle_show_vid)
             st.session_state.display_checkbox = display_checkbox
@@ -136,6 +145,11 @@ def main(_args):
                             mime="text/csv",
                             help="Download the vehicle count report in CSV format")
     
+    st.markdown("""
+    <footer style="text-align:center; padding: 0px; background-color: transparent; bottom: 0; width: 100%; color: white;">
+        <br>© 2024 Autoistics. All rights reserved. Developed by Eehab and Fayyez with love. ✨
+    </footer>
+    """, unsafe_allow_html=True)
 
 
     ## page routing
