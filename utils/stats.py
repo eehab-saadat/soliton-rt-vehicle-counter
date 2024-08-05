@@ -15,7 +15,6 @@ def get_theme():
 @st.cache_data
 def draw_chart(data: DataFrame, theme: dict):
     fig, ax = plt.subplots()
-    print("theme is:", theme, "\n\n\n")
     fig.patch.set_facecolor(theme["backgroundColor"])
     wedges, texts, autotexts = ax.pie(data["counts"], labels=data["class"], autopct='%1.1f%%', startangle=90)
     ax.axis('equal')

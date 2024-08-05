@@ -2,4 +2,4 @@ ultralytics==8.2.45
 streamlit==1.37.0
 streamlit-option-menu
 pygrabber
-streamlit-theme
+st-theme
