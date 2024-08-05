@@ -1,5 +1,6 @@
-from streamlit import session_state
+from streamlit import session_state, dialog
 from tempfile import NamedTemporaryFile
+from utils.dialogBox import showDialogBox
 
 def on_upload() -> None:
     if session_state.get("uploaded_file") is not None: # if a file is uploaded
@@ -13,4 +14,4 @@ def on_upload() -> None:
         
     else:
         # TODO: show error message popup
-        print("file not uploaed")
+        showDialogBox(header="Upload Error", message="File not uploaded properly. file not present, incompatible format or file size > 200mb")
