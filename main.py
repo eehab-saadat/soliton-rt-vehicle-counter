@@ -1,9 +1,32 @@
-from classes.model import MODEL
-from ultralytics import YOLO
-model = MODEL()
-model.mount(YOLO(model='weights/final.pt'))
-region_points = [(500, 450), (550, 450), (550, 900), (500, 900)]
-linear_points = [(500, 450), (500, 1300)]
-model.count("samples/sample.mp4", 1, linear_points)
-# mydict = {"bike":{"IN":1, "OUT":2}, "car":{"IN":5, "OUT":5}}
-# model.execute(skip=10)
+import streamlit as st
+from cv2.typing import MatLike
+from cv2 import VideoCapture, CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT, waitKey, destroyAllWindows
+
+
+@st.fragment
+def updateFrame(frame: MatLike):
+    with st.session_state.main_pane[1]:
+        # print(st.session_state.main_pane_cols)
+        # st.session_state.frame_bucket.image(frame, channels="BGR")
+        st.write("Frame updated")
+
+def count(capture: VideoCapture = VideoCapture(0), resolution: tuple = (1280, 720)) -> None:
+            frame_width, frame_height = resolution
+            # source = source if source != "0" else 0
+            # capture = VideoCapture(source)
+            capture.set(CAP_PROP_FRAME_WIDTH, frame_width)
+            capture.set(CAP_PROP_FRAME_HEIGHT, frame_height)
+
+            while capture.isOpened():
+                success, im0 = capture.read()
+                if not success:
+                    break
+
+                # update the frame in session state
+                updateFrame(im0)
+
+                if waitKey(1) == ord('q'):
+                    break
+
+            capture.release()
+            destroyAllWindows()
