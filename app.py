@@ -62,8 +62,7 @@ def main(_args):
                 <br>
                 ''', unsafe_allow_html=True)
 
-    main_pane = st.columns(st.session_state.main_pane_cols, vertical_alignment="top", gap='small')
-    st.session_state.main_pane = main_pane
+    st.session_state.main_pane = st.columns(st.session_state.main_pane_cols, vertical_alignment="top", gap='small')
 
     with st.session_state.main_pane[0]:
 
@@ -133,11 +132,15 @@ def main(_args):
 
     # container declaration for video streaming
     if st.session_state.main_pane_cols == 2:
-          with main_pane[1]:
-            # if "frame_bucket" not in st.session_state:
-            st.session_state.frame_bucket = st.empty()
+          with st.session_state.main_pane[1]:
+            if "frame_bucket" not in st.session_state:
+                st.session_state.frame_bucket_container = st.container()
+                st.session_state.frame_bucket = st.session_state.frame_bucket_container.empty()
             if not st.session_state.model_mounted:
                 st.session_state.frame_bucket.image(image="assets/placeholder-bg.png")
+    
+    with st.session_state.main_pane[0]:
+        st.write("## Vehicle Count Statistics")
 
     try:
     # rendering data vidualization
