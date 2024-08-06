@@ -1,10 +1,23 @@
 from utils.onlycams import list_hot_cameras_on_my_device
-from streamlit import session_state, rerun
+from streamlit import session_state, rerun, fragment, cache_resource
 from tempfile import NamedTemporaryFile
 from utils.dialogBox import showDialogBox
 from classes.new_model import MODEL
 from classes.inference import INSTANCE
 from utils.test import updateFrame
+
+@cache_resource
+def load_model():
+    model = MODEL(YOLO("weights/final_openvino_model"))
+    return model
+
+@fragment(run_every=0.1)
+def updateFrame():
+    frame = session_state.model_instance.read()
+    if frame is not None:
+        session_state.frame_bucket.image(frame, channels="BGR")
+    else:
+        session_state.frame_bucket.image(image="assets/placeholder-bg.png")
 
 def handle_camera_stream() -> None:
     all_cams = list_hot_cameras_on_my_device()
