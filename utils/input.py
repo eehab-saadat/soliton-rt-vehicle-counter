@@ -2,20 +2,16 @@ from utils.onlycams import list_hot_cameras_on_my_device
 from streamlit import session_state, rerun
 from tempfile import NamedTemporaryFile
 from utils.dialogBox import showDialogBox
-from classes.model import MODEL
+from classes.new_model import MODEL
 from classes.inference import INSTANCE
+from utils.test import updateFrame
 
-
-def runInstance(model: MODEL, args: tuple):
-    instance = INSTANCE()
-    instance.add(model.count, args=args)
-def handle_camera_stream(model: MODEL, toSkip: int, linear_points: list) -> None:
+def handle_camera_stream() -> None:
     all_cams = list_hot_cameras_on_my_device()
     session_state.model_mounted = True
     session_state.menu_options = [session_state.selected]
-    runInstance(model, (all_cams[session_state.selected_cam], toSkip, linear_points))
-
-    # model.count(source=all_cams[session_state.selected_cam], skip=2, region_points=linear_points)
+    session_state.model_instance.start()
+    updateFrame()
 
 def on_upload(model: MODEL, linear_points: list) -> None:
     if session_state.get("uploaded_file") is not None: # if a file is uploaded

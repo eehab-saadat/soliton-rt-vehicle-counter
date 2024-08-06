@@ -1,0 +1,22 @@
+description: Ultralytics YOLOv10n model trained on /kaggle/input/roboflow-final-dataset-vehicle-unbalanced/comsats-gate3-dataset.v2-first-version-greyscale.yolov9/data.yaml
+author: Ultralytics
+date: '2024-08-06T17:57:01.685560'
+version: 8.2.45
+license: AGPL-3.0 License (https://ultralytics.com/license)
+docs: https://docs.ultralytics.com
+stride: 32
+task: detect
+batch: 1
+imgsz:
+- 640
+- 640
+names:
+  0: autorickshaw
+  1: bicycle
+  2: bike
+  3: bus
+  4: car
+  5: chingchi
+  6: tractor
+  7: truck
+  8: van

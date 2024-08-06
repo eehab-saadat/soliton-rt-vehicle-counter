@@ -1,29 +1,31 @@
 # imports
 import streamlit as st
-# from classes.model import MODEL
-# from ultralytics import YOLO
-from utils.background_setter import set_png_as_page_bg
+from classes.new_model import MODEL
+from ultralytics import YOLO
 from streamlit_option_menu import option_menu
 from utils.onlycams import list_hot_cameras_on_my_device
-from utils.upload import on_upload
-from utils.camera import handle_camera_stream
+from utils.input import handle_camera_stream, on_upload, handle_ip_stream
 from utils.main_layout import handle_show_vid
 from datetime import datetime
 from utils.stats import render_statistics
 from pandas import read_csv, DataFrame
+import cv2
 
 ## Mounting model
-# video_path = r"C:\Users\Fayyez.Farrukh\Documents\NPI\Og videos\002.mp4"
-# model = MODEL()
-# model.mount(YOLO('weights/final.pt'))
-# region_points = [(500, 450), (550, 450), (550, 900), (500, 900)]
+video_path = r"C:\Users\Fayyez.Farrukh\Documents\NPI\Og videos\002.mp4"
+region_points = [(500, 450), (550, 450), (550, 900), (500, 900)]
 linear_points = [(500, 450), (500, 1300)]
 
 def main(_args):
 
+    # @st.fragment(run_every=0.05)
+    # def updateFrame(model: MODEL):
+    #     st.session_state.frame_bucket.image(model.read(), channels="BGR")
+
     def handle_reset():
         st.session_state.model_mounted = False
         st.session_state.menu_options = ["Upload", "With IP Address", "Use Camera"]
+        st.session_state.model_instance.stop()
 
     # page configurations
     initial_layout = "centered"
@@ -32,6 +34,9 @@ def main(_args):
         page_icon="🚗",
         layout=st.session_state.current_layout if "current_layout" in st.session_state else initial_layout
     )
+
+    if "model_instance" not in st.session_state:
+        st.session_state.model_instance = MODEL(YOLO("weights/final_openvino_model"))
 
     if "current_layout" not in st.session_state:
         st.session_state.current_layout = initial_layout
@@ -129,12 +134,16 @@ def main(_args):
     # container declaration for video streaming
     if st.session_state.main_pane_cols == 2:
           with main_pane[1]:
+            # if "frame_bucket" not in st.session_state:
             st.session_state.frame_bucket = st.empty()
-            st.session_state.frame_bucket.image(image="assets/placeholder-bg.png")
+            if not st.session_state.model_mounted:
+                st.session_state.frame_bucket.image(image="assets/placeholder-bg.png")
 
+    try:
     # rendering data vidualization
-    render_statistics()
-
+        render_statistics()
+    except Exception as e:
+        pass
     
     # download button
     # TODO: manage 

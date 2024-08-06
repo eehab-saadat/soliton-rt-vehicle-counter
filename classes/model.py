@@ -95,9 +95,6 @@ class MODEL:
                     tracks = self.__model.track(im0, persist=True, show=False, verbose=False)
                     im0 = object_counter.start_counting(im0, tracks)
 
-                    # update the frame in session state
-                    updateFrame(im0)
-
                     new_classwise_count = object_counter.class_wise_count
 
                     if new_classwise_count != old_classwise_count:
