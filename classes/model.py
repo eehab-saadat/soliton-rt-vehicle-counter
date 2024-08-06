@@ -4,7 +4,12 @@ from ultralytics import YOLO, solutions
 from ultralytics.solutions import ObjectCounter
 from cv2 import imshow, waitKey, destroyAllWindows, VideoCapture
 from cv2 import CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT, CAP_PROP_POS_FRAMES
+from cv2.typing import MatLike
 import streamlit as st
+
+@st.fragment(run_every=0.05)
+def updateFrame(frame: MatLike):
+    st.session_state.frame_bucket.image(frame, channels="BGR")
 
 class MODEL:
     __model = None
@@ -62,13 +67,13 @@ class MODEL:
                     for direction in keys:
                         print(f"{cls.capitalize()} ({direction}) = {val[direction]}")
 
-    def count(self, source: str = "0", skip: int = 1, region_points: list = [], resolution: tuple = (1280, 720), show_vid: bool = False) -> None:
+    def count(self, capture: VideoCapture = VideoCapture(0), skip: int = 1, region_points: list = [], resolution: tuple = (1280, 720), show_vid: bool = False) -> None:
         if isinstance(self.__model, YOLO):
             try:
                 frame_width, frame_height = resolution
                 frame_count = 0
-                source = source if source != "0" else 0
-                capture = VideoCapture(source)
+                # source = source if source != "0" else 0
+                # capture = VideoCapture(source)
                 capture.set(CAP_PROP_FRAME_WIDTH, frame_width)
                 capture.set(CAP_PROP_FRAME_HEIGHT, frame_height)
                 
@@ -90,8 +95,8 @@ class MODEL:
                     tracks = self.__model.track(im0, persist=True, show=False, verbose=False)
                     im0 = object_counter.start_counting(im0, tracks)
 
-                    # updt the frame in session state
-                    st.session_state.frame_bucket.image(im0, channels="BGR")
+                    # update the frame in session state
+                    updateFrame(im0)
 
                     new_classwise_count = object_counter.class_wise_count
 
