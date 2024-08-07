@@ -1,32 +1,35 @@
 from utils.onlycams import list_hot_cameras_on_my_device
-from streamlit import session_state, rerun, fragment, cache_resource
+from streamlit import session_state, rerun, fragment, container, cache_resource, button, header, write, columns
 from tempfile import NamedTemporaryFile
 from utils.dialogBox import showDialogBox
-from classes.new_model import MODEL
+# from classes.new_model import MODEL
 from classes.inference import INSTANCE
-from utils.test import updateFrame
 
-@cache_resource
-def load_model():
-    model = MODEL(YOLO("weights/final_openvino_model"))
-    return model
+def load_instance():
+    return ["model 1", "model 2", "model 3", "model 4"]
 
-@fragment(run_every=0.1)
-def updateFrame():
-    frame = session_state.model_instance.read()
-    if frame is not None:
-        session_state.frame_bucket.image(frame, channels="BGR")
-    else:
-        session_state.frame_bucket.image(image="assets/placeholder-bg.png")
+def removeItem(lst, indx: int = 0):
+    lst.pop(indx)
+    return lst
+
+@fragment
+def update_model_status_table():
+    # TODO: insert a tabele with list of running threds and buttons to close those camera threads
+    header("Running Cameras")
+    for i, item in enumerate(session_state.instance):
+        col1, col2 = columns(2, gap="large")
+        with col1:
+            write(item)
+        with col2:
+            if button("❌", key=f"close_btn_{i}"):
+                session_state.instance = removeItem(session_state.instance, i)
+    
 
 def handle_camera_stream() -> None:
     all_cams = list_hot_cameras_on_my_device()
     session_state.model_mounted = True
-    session_state.menu_options = [session_state.selected]
-    session_state.model_instance.start()
-    updateFrame()
 
-def on_upload(model: MODEL, linear_points: list) -> None:
+def on_upload(model, linear_points: list) -> None:
     if session_state.get("uploaded_file") is not None: # if a file is uploaded
         video_file = session_state.uploaded_file
         session_state.menu_options = [session_state.selected]
@@ -42,7 +45,7 @@ def on_upload(model: MODEL, linear_points: list) -> None:
         showDialogBox(heading="Upload Error", 
                       message="File not uploaded properly. file not present, incompatible format or file size > 200mb.")
         
-def handle_ip_stream(model: MODEL, source: str, toSkip: int, linear_points: list) -> None:
+def handle_ip_stream(model, source: str, toSkip: int, linear_points: list) -> None:
     model.count(source=source, skip=1, region_points=linear_points)
     #TODO: add error handling for invalid IP addresses
     pass
