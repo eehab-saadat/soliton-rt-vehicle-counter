@@ -1,5 +1,5 @@
 from threading import Thread
-from model import MODEL
+from classes.model import MODEL
 from ultralytics import YOLO
 from time import sleep
 
@@ -18,24 +18,24 @@ class INSTANCE:
     def __init__(self):
         pass
 
-    def add(self, model: MODEL, source: str = "0", show_vid: bool = False) -> bool:
+    def add(self, model: MODEL, source: str = "0", show_vid: bool = False) -> int:
         source = 0 if source == "0" else source
 
         kill_dead_threads(self.__instances)
         if (len(self.__instances) >= 5):
             print("Maximum number of instances reached. Please stop some instances before adding new ones.")
-            return False
+            return 1
         
         if source in list(self.__instances.keys()):
             print(f"Source {source} already exists in the list of instances.")
-            return False
+            return 2
         
         thread = Thread(target=model.count, kwargs={"source": source, "show_vid": show_vid})
         thread.start()
         if isinstance(source, int):
             source = str(source)
         self.__instances[source] = (thread, model)
-        return True
+        return 0
 
     def print_vitals(self):
         print(f"Instances: {self.__instances}")

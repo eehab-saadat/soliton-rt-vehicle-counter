@@ -2,22 +2,31 @@ from utils.onlycams import list_hot_cameras_on_my_device
 from streamlit import session_state, rerun, fragment, container, cache_resource, button, header, write, columns
 from tempfile import NamedTemporaryFile
 from utils.dialogBox import showDialogBox
-# from classes.new_model import MODEL
+from classes.new_model import MODEL
 from classes.inference import INSTANCE
+from ultralytics import YOLO
 
+@cache_resource
 def load_instance():
-    return ["model 1", "model 2", "model 3", "model 4"]
+    return INSTANCE()
 
+#TODO: remove this function, only here for testing
 def removeItem(lst, indx: int = 0):
     lst.pop(indx)
     return lst
+
+# function to load model and add to the instance
+def add_model_to_instance(source: str, weights: str = "weights/final.pt"):
+    model = MODEL()
+    model.mount(YOLO("weights/final.pt"))
+    instance.add(model, temp.name)
 
 @fragment
 def update_model_status_table():
     # TODO: insert a tabele with list of running threds and buttons to close those camera threads
     header("Running Cameras")
     for i, item in enumerate(session_state.instance):
-        col1, col2 = columns(2, gap="large")
+        col1, col2 = columns(2, gap="small")
         with col1:
             write(item)
         with col2:
@@ -32,13 +41,11 @@ def handle_camera_stream() -> None:
 def on_upload(model, linear_points: list) -> None:
     if session_state.get("uploaded_file") is not None: # if a file is uploaded
         video_file = session_state.uploaded_file
-        session_state.menu_options = [session_state.selected]
-        # model.count(src=video_file.upload_url)
-
+        instance = load_instance()
         # create a temporary copy of the uploaded file in storage folder
         with NamedTemporaryFile(delete=False, suffix=video_file.name.split(".")[-1]) as temp:
             temp.write(video_file.read())
-            model.count(temp.name, 1, linear_points)
+            add_model_to_instance(temp.name)
         
     else:
         # TODO: show error message popup
