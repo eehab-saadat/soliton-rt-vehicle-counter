@@ -3,24 +3,39 @@ from model import MODEL
 from ultralytics import YOLO
 from time import sleep
 
+def kill_dead_threads(instances: dict) -> None:
+    for key in list(instances.keys()):
+        thread, model = instances[key]
+        if not thread.is_alive():
+            model.stop()
+            del thread
+            del model
+            del instances[key]
+
 class INSTANCE:
     __instances : dict = {}
 
     def __init__(self):
         pass
 
-    def add(self, model: MODEL, source: str = "0", show_vid:bool=False) -> None:
+    def add(self, model: MODEL, source: str = "0", show_vid: bool = False) -> bool:
         source = 0 if source == "0" else source
+
+        kill_dead_threads(self.__instances)
+        if (len(self.__instances) >= 5):
+            print("Maximum number of instances reached. Please stop some instances before adding new ones.")
+            return False
         
         if source in list(self.__instances.keys()):
             print(f"Source {source} already exists in the list of instances.")
-            return
+            return False
         
         thread = Thread(target=model.count, kwargs={"source": source, "show_vid": show_vid})
         thread.start()
         if isinstance(source, int):
             source = str(source)
         self.__instances[source] = (thread, model)
+        return True
 
     def print_vitals(self):
         print(f"Instances: {self.__instances}")
