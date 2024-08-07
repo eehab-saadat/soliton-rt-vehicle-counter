@@ -1,12 +1,13 @@
 from utils.onlycams import list_hot_cameras_on_my_device
-from streamlit import session_state, rerun, fragment, container, cache_resource, button, header, write, columns
+from streamlit import session_state, fragment, cache_resource, button, header, write, columns
 from tempfile import NamedTemporaryFile
 from utils.dialogBox import showDialogBox
-# from classes.new_model import MODEL
-from classes.inference import INSTANCE
+from classes.inference import INSTANCE, kill_dead_threads
+from classes.model import MODEL
 
+@cache_resource
 def load_instance():
-    return ["model 1", "model 2", "model 3", "model 4"]
+    return INSTANCE()
 
 def removeItem(lst, indx: int = 0):
     lst.pop(indx)
@@ -31,14 +32,12 @@ def handle_camera_stream() -> None:
 
 def on_upload(model, linear_points: list) -> None:
     if session_state.get("uploaded_file") is not None: # if a file is uploaded
-        video_file = session_state.uploaded_file
-        session_state.menu_options = [session_state.selected]
-        # model.count(src=video_file.upload_url)
-
-        # create a temporary copy of the uploaded file in storage folder
+        video_file = session_state.uploaded_file # get the uploaded file
+        instance = load_instance() # get the instance of model inference object
         with NamedTemporaryFile(delete=False, suffix=video_file.name.split(".")[-1]) as temp:
             temp.write(video_file.read())
             model.count(temp.name, 1, linear_points)
+            model = MODEL()
         
     else:
         # TODO: show error message popup

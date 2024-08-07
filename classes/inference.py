@@ -1,5 +1,5 @@
 from threading import Thread
-from model import MODEL
+from classes.model import MODEL
 from ultralytics import YOLO
 from time import sleep
 

@@ -57,6 +57,7 @@ def main(_args):
                                 icons=["upload", "hdd-network", "camera"],
                                 orientation="vertical",
                                 menu_icon="record-btn")
+        
         if "option_menu" not in st.session_state:
             st.session_state.selected = selected
 
