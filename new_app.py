@@ -1,17 +1,14 @@
 # imports
 import streamlit as st
-# from classes.new_model import MODEL
-# from ultralytics import YOLO
-from streamlit_option_menu import option_menu
-from utils.onlycams import list_hot_cameras_on_my_device
-from utils.input import handle_camera_stream, on_upload, handle_ip_stream, update_model_status_table
 from utils.main_layout import handle_show_vid
 from datetime import datetime
 from utils.stats import render_statistics
 from pandas import read_csv, DataFrame
 import cv2
-
-from utils.input import removeItem, load_instance
+from components.main_pane import display_option_menu
+from components.active_camera_table import update_model_status_table
+from utils.input import load_instance
+from classes.inference import kill_dead_threads
 
 ## Mounting model
 video_path = r"C:\Users\Fayyez.Farrukh\Documents\NPI\Og videos\002.mp4"
@@ -20,19 +17,29 @@ linear_points = [(500, 450), (500, 1300)]
 
 def main(_args):
 
-    #st.fragment
-
     # page configurations
     page_config = st.set_page_config(
         page_title="Object Counter",
         page_icon="🚗",
-        layout="centered",
+        layout="centered" if "current_layout" not in st.session_state else st.session_state.current_layout,
         initial_sidebar_state="expanded"
     )
-    
-    # status of model
-    if "model_mounted" not in st.session_state:
-        st.session_state.model_mounted = False
+
+    # creating dataframe
+    instance = load_instance()
+    kill_dead_threads(instance.instances) # kill all dead instances if any
+    st.session_state.sources = instance.get_active_sources()
+    st.session_state.active_cams_present = True if len(st.session_state.sources) > 0 else False
+    print("\n", st.session_state.sources, "\n")
+
+    # defining current layout
+    if "current_layout" not in st.session_state:
+        st.session_state.current_layout = "centered"
+
+    if st.session_state.active_cams_present:
+        st.session_state.main_pane_cols = 2
+    else:
+        st.session_state.main_pane_cols = 1
 
     # title of page
     st.markdown('''<h1 style='text-align: center; color: white; font-style: italic; font-size: 56px; margin:0'>
@@ -45,74 +52,29 @@ def main(_args):
                 ''', unsafe_allow_html=True)
     
     # setting width of sidebar
-    st.markdown(
-    """
-    <style>
-        section[data-testid="stSidebar"] {
-            width: 1000px !important;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True,
-    )
-    # displaying control panel
-    with st.sidebar:
-        # heading
-        st.header(" Control Panel")
-        # option menu
-        if "menu_options" not in st.session_state:
-            st.session_state.menu_options = ["Upload", "With IP Address", "Use Camera"]
-        selected = option_menu("Select Video", 
-                                options=st.session_state.menu_options,
-                                icons=["upload", "hdd-network", "camera"],
-                                orientation="vertical",
-                                menu_icon="record-btn")
-        
-        if "option_menu" not in st.session_state:
-            st.session_state.selected = selected
+    # st.markdown(
+    # """
+    # <style>
+    #     section[data-testid="stSidebar"] {
+    #         width: 1000px !important;
+    #     }
+    # </style>
+    # """,
+    # unsafe_allow_html=True,
+    # )
 
-         # empty container for input option
-        st.session_state.input_option_bucket = st.empty()
-        st.session_state.start_button, st.session_state.download_button = st.columns([1,1], gap="small")
+    st.session_state.main_pane = st.columns(st.session_state.main_pane_cols)
 
-        if st.session_state.selected == "Upload":
-            # create and upload file dropbox and opload button
-            uploaded_file =  st.session_state.input_option_bucket.file_uploader(label="Upload Video:hot_pepper:", 
-                            type=["mp4", "avi", "mov", "mkv"], 
-                            help="Upload a video file. Allowed formats: mp4, avi, mov, mkv",
-                            accept_multiple_files=False)
-            with st.session_state.start_button:
-                st.session_state.upload_button = st.button(label="Upload", 
-                                                        key="upload_btn", 
-                                                        help="Run the model inference and start counting vehicles",
-                                                        on_click=on_upload)
-            st.session_state.uploaded_file = uploaded_file
 
-        elif st.session_state.selected == "With IP Address":
-             st.session_state.input_option_bucket.IP_address = st.session_state.input_option_bucket.text_input("Enter IP Address", "")
-             with st.session_state.start_button:
-                st.session_state.run_stream_button = st.button("Start Streaming", 
-                                            help="Run the model inference and start counting vehicles from netwrook camera input",
-                                            key="run_ip_cam_btn")
-                                            # on_click=lambda: model.count("http://" + IP_address, 1, linear_points)
-
-        elif st.session_state.selected == "Use Camera":
-            # display all available web cams in dropdown
-            all_cams = list_hot_cameras_on_my_device()
-            st.session_state.input_option_bucket.selected_cam =  st.session_state.input_option_bucket.selectbox(label="Select camera from the list below",
-                                                        options=list(all_cams.keys()))
-            with st.session_state.start_button:
-                st.session_state.run_cam_button = st.button("Open Camera", 
-                                                            help="Run the model inference and start counting vehicles from selected camera input",
-                                                            key="run_cam_btn",
-                                                            on_click=handle_camera_stream,
-                                                            disabled=st.session_state.model_mounted)
     if "instance" not in st.session_state:
         st.session_state.instance = load_instance()
-    
-    st.session_state.model_table = st.empty()
 
-    update_model_status_table()
+    # display options menu
+    display_option_menu()
+
+    # creating running cameras summary in table here
+    if st.session_state.active_cams_present:
+       update_model_status_table()
 
     # diaplay stats and data visualization
     st.write("## Vehicle Count Statistics")

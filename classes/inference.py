@@ -13,20 +13,27 @@ def kill_dead_threads(instances: dict) -> None:
             del instances[key]
 
 class INSTANCE:
-    __instances : dict = {}
+    instances : dict = {}
 
     def __init__(self):
         pass
 
     def add(self, model: MODEL, source: str = "0", show_vid: bool = False) -> int:
+        '''
+        returns 0: for successful model upload
+
+        returns 1: for MAX model limit reached
+        
+        returns 2: for source already present in the dictionary
+        '''
         source = 0 if source == "0" else source
 
-        kill_dead_threads(self.__instances)
-        if (len(self.__instances) >= 5):
+        kill_dead_threads(self.instances)
+        if (len(self.instances) >= 5):
             print("Maximum number of instances reached. Please stop some instances before adding new ones.")
             return 1
         
-        if source in list(self.__instances.keys()):
+        if source in list(self.instances.keys()):
             print(f"Source {source} already exists in the list of instances.")
             return 2
         
@@ -34,20 +41,20 @@ class INSTANCE:
         thread.start()
         if isinstance(source, int):
             source = str(source)
-        self.__instances[source] = (thread, model)
+        self.instances[source] = (thread, model)
         return 0
 
     def print_vitals(self):
-        print(f"Instances: {self.__instances}")
+        print(f"Instances: {self.instances}")
 
     def get_active_sources(self):
-        return list(self.__instances.keys())
+        return list(self.instances.keys())
 
     def stop(self, source: str) -> None:
         if isinstance(source, int):
             source = str(source)
 
-        val = self.__instances.pop(source, None)
+        val = self.instances.pop(source, None)
         if val is not None:
             thread, model = val
             model.stop()
@@ -57,8 +64,8 @@ class INSTANCE:
             print(f"Source {source} not found in the list of instances.")
 
     def stop_all(self):
-        for key in list(self.__instances.keys()):
-            val = self.__instances.pop(key, None)
+        for key in list(self.instances.keys()):
+            val = self.instances.pop(key, None)
             if val is not None:
                 thread, model = val
                 model.stop()

@@ -1,62 +1,62 @@
-from utils.onlycams import list_hot_cameras_on_my_device
 import streamlit as st
 from tempfile import NamedTemporaryFile
 from utils.dialogBox import showDialogBox
-from classes.new_model import MODEL
+from utils.onlycams import list_hot_cameras_on_my_device
+from classes.model import MODEL
 from classes.inference import INSTANCE
 from ultralytics import YOLO
 from pandas import DataFrame
+from cv2 import VideoCapture, destroyAllWindows
 
 @st.cache_resource
 def load_instance():
     return INSTANCE()
 
-#TODO: remove this function, only here for testing
-def removeItem(lst, indx: int = 0):
-    lst.pop(indx)
-    return lst
+def active_cams_present() -> bool:
+    active_sources = load_instance().get_active_sources()
+    if len(active_sources) == 0:
+        return False
+    else:
+        return True
+
+def get_selected_widgets():
+    # Filter the DataFrame to get the selected widgets
+    selected_widgets = myvar[myvar["favorite"]]["widgets"].tolist() 
 
 # function to load model and add to the instance
 def add_model_to_instance(source: str, weights: str = "weights/final.pt"):
-    model = MODEL()
-    instance: INSTANCE = load_instance()
-    model.mount(YOLO("weights/final.pt"))
-    instance.add(model, source)
-
-@st.fragment
-def update_model_status_table():
-    # TODO: insert a tabele with list of running threds and buttons to close those camera threads
     
-    # creating dataframe
-    sources = load_instance().get_active_sources
-    data_df = DataFrame(
-    {
-        "Active Sources": sources,
-        "Select": [False for source in sources],
-    })
-    # creating the editable table with checkboxes
-    st.session_state.running_cameras_table = st.data_editor(
-        data_df,
-        column_config={
-            "favorite": st.column_config.CheckboxColumn(
-                "Your favorite?",
-                help="Select your *favorite* widgets",
-                default=False,
-            )
-        },
-        disabled=["widgets"],
-        hide_index=True,
-    )
+    # check if given source is valid video capture object
+    cap = VideoCapture(source)
+    if not cap.isOpened():
+        # if video cpture object cannot be created
+        showDialogBox(heading="Error 03: Invalid Sideo Source",
+                      message="The source of video given could not be loaded due to corrupt file, unstable connection or incorrect IP address")
+    else:
+        cap.release()
+        destroyAllWindows()
 
-
-def handle_camera_stream() -> None:
-    all_cams = list_hot_cameras_on_my_device()
-    st.session_state.model_mounted = True
-
+    # load model and mount the weights
+    model = MODEL()
+    model.mount(YOLO(weights))
+    # fetch instance and add model
+    instance: INSTANCE = load_instance()
+    response =  instance.add(model, source)
+    # manage all response conditions here
+    if response == 0:
+        print("model loaded successfully")
+        return True # true for successful execution of add camera to instance
+    elif response == 1:
+        showDialogBox(heading="Error 01: Camera Limit Reached", 
+                      message="Only 5 cameras can be added at a time. Kindly remove active cameras before adding new cameras.")
+    elif response == 2:
+        showDialogBox(heading="Error 02: Camera Duplication",
+                      message="This camera is already present in the active cameras list. Please choose another camera or hav patience.")
+    return False # false indicates failure to add the camera source to instance
+   
 def on_upload(model, linear_points: list) -> None:
     if st.session_state.get("uploaded_file") is not None: # if a file is uploaded
         video_file = st.session_state.uploaded_file
-        instance = load_instance()
         # create a temporary copy of the uploaded file in storage folder
         with NamedTemporaryFile(delete=False, suffix=video_file.name.split(".")[-1]) as temp:
             temp.write(video_file.read())
@@ -67,7 +67,16 @@ def on_upload(model, linear_points: list) -> None:
         showDialogBox(heading="Upload Error", 
                       message="File not uploaded properly. file not present, incompatible format or file size > 200mb.")
         
-def handle_ip_stream(model, source: str, toSkip: int, linear_points: list) -> None:
-    model.count(source=source, skip=1, region_points=linear_points)
-    #TODO: add error handling for invalid IP addresses
-    pass
+def handle_ip_stream(source: str) -> None:
+    add_model_to_instance(source)
+
+# handling case of using camera stream
+def handle_camera_stream() -> None:
+    selected_option = str(st.session_state.selected_cam)
+    if selected_option == None:
+        showDialogBox(heading="Error 05: Camera Not Found",
+                      message="Please select a camera first before trying to use that camera's stream for detections")
+        return None
+    all_cams = list_hot_cameras_on_my_device()
+    print("selected camera is: ", all_cams[selected_option])
+    add_model_to_instance(all_cams[selected_option])
