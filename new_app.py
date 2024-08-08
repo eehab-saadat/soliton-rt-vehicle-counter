@@ -44,8 +44,18 @@ def main(_args):
                 <br>
                 ''', unsafe_allow_html=True)
     
-    # st.sidebar.markdown('''<h2 style='text-align: center; color: white; font-style: italic; font-size: 24px; margin:0'>''')
-    # displaying the control panel
+    # setting width of sidebar
+    st.markdown(
+    """
+    <style>
+        section[data-testid="stSidebar"] {
+            width: 1000px !important;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+    )
+    # displaying control panel
     with st.sidebar:
         # heading
         st.header(" Control Panel")

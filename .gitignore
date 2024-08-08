@@ -7,10 +7,15 @@ __pycache__/
 
 samples/
 
+# runs
+runs/
+
 counts.csv
 
 # C extensions
 *.so
+
+waleed-ai/
 
 # Distribution / packaging
 .Python
