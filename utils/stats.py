@@ -2,6 +2,9 @@ import streamlit as st
 from pandas import DataFrame, read_csv
 import matplotlib.pyplot as plt
 from streamlit_theme import st_theme
+import random
+
+random.seed()  # Seed the random number generator
 
 def get_theme():
     theme = st_theme()
