@@ -27,7 +27,6 @@ def draw_chart(data: DataFrame, theme: dict):
 
 @st.fragment(run_every=10)
 def render_statistics():
-    st.session_state.data_for_visualization = read_csv("counts.csv")
     # get the current system theme
     theme = get_theme()
     # create tabs
