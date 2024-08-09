@@ -7,10 +7,13 @@ from cv2 import CAP_PROP_POS_FRAMES
 from cv2.typing import MatLike
 from datetime import datetime 
 from datetime import datetime
+from os.path import exists
+from os import makedirs
+
 def getName(source: str):
     if isinstance(source, int):
         source = str(source)
-
+    source = source.split("\\")[-1]
     if "http" in source or "https" in source:
         source = source.removeprefix("http://").removeprefix("https://").replace(".com","").replace("www.", "").replace("/", "_").replace(".", "_"). replace(":", "_")
     elif source.isdigit():
@@ -60,10 +63,12 @@ class MODEL:
         else:
             print("Operation unsupported for the mounted model.")
 
-    def __dump(self, counts: dict, source: str) -> None:
+    def __dump(self, counts: dict, source: str, output: str = "storage") -> None:
         classes = self.__model.names
+        if not exists(output):
+            makedirs(output)
         filename = getName(source)
-        with open(filename, "w", newline="") as file:
+        with open(output + "/" + filename, "w", newline="") as file:
             csv_writer = writer(file)
             csv_writer.writerow(["class", "counts"])
             for cls in list(classes.values()):

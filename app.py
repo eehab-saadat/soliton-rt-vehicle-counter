@@ -1,6 +1,6 @@
 # imports
 import streamlit as st
-from classes.new_model import MODEL
+from new_model import MODEL
 from ultralytics import YOLO
 from streamlit_option_menu import option_menu
 from utils.onlycams import list_hot_cameras_on_my_device

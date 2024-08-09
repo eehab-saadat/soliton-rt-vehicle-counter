@@ -19,28 +19,27 @@ def active_cams_present() -> bool:
     else:
         return True
 
-def get_selected_widgets():
-    # Filter the DataFrame to get the selected widgets
-    selected_widgets = myvar[myvar["favorite"]]["widgets"].tolist() 
-
 # function to load model and add to the instance
 def add_model_to_instance(source: str, weights: str = "weights/final.pt"):
     
+    # fetch instance and add model
+    instance: INSTANCE = load_instance()
     # check if given source is valid video capture object
-    cap = VideoCapture(source)
-    if not cap.isOpened():
-        # if video cpture object cannot be created
-        showDialogBox(heading="Error 03: Invalid Sideo Source",
-                      message="The source of video given could not be loaded due to corrupt file, unstable connection or incorrect IP address")
-    else:
-        cap.release()
-        destroyAllWindows()
+    # print("present sources are : ", instance.get_active_sources())
+    if str(source) not in instance.get_active_sources():
+        cap = VideoCapture(source)
+        if not cap.isOpened():
+            # if video cpture object cannot be created
+            showDialogBox(heading="Error 03: Invalid Sideo Source",
+                        message="The source of video given could not be loaded due to corrupt file, unstable connection or incorrect IP address")
+            return
+        else:
+            cap.release()
+            destroyAllWindows()
 
     # load model and mount the weights
     model = MODEL()
     model.mount(YOLO(weights))
-    # fetch instance and add model
-    instance: INSTANCE = load_instance()
     response =  instance.add(model, source)
     # manage all response conditions here
     if response == 0:
@@ -54,7 +53,7 @@ def add_model_to_instance(source: str, weights: str = "weights/final.pt"):
                       message="This camera is already present in the active cameras list. Please choose another camera or hav patience.")
     return False # false indicates failure to add the camera source to instance
    
-def on_upload(model, linear_points: list) -> None:
+def on_upload() -> None:
     if st.session_state.get("uploaded_file") is not None: # if a file is uploaded
         video_file = st.session_state.uploaded_file
         # create a temporary copy of the uploaded file in storage folder
@@ -78,5 +77,4 @@ def handle_camera_stream() -> None:
                       message="Please select a camera first before trying to use that camera's stream for detections")
         return None
     all_cams = list_hot_cameras_on_my_device()
-    print("selected camera is: ", all_cams[selected_option])
     add_model_to_instance(all_cams[selected_option])

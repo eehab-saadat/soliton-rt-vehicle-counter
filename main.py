@@ -1,32 +1,27 @@
-import streamlit as st
-from cv2.typing import MatLike
-from cv2 import VideoCapture, CAP_PROP_FRAME_WIDTH, CAP_PROP_FRAME_HEIGHT, waitKey, destroyAllWindows
+import threading 
+from streamlit.runtime.scriptrunner import add_script_run_ctx
+from streamlit.runtime.scriptrunner.script_run_context import get_script_run_ctx
+from streamlit.runtime import get_instance
+import datetime
+from utils.input import load_instance
+from new_app import main
+def start_beating(status: bool):
+    thread = threading.Thread(target=start_beating, args=(False,))
 
+    add_script_run_ctx(thread) 
+    ctx = get_script_run_ctx()     
+    runtime = get_instance()     # this is the main runtime, contains all the sessions
 
-@st.fragment
-def updateFrame(frame: MatLike):
-    with st.session_state.main_pane[1]:
-        # print(st.session_state.main_pane_cols)
-        # st.session_state.frame_bucket.image(frame, channels="BGR")
-        st.write("Frame updated")
-
-def count(capture: VideoCapture = VideoCapture(0), resolution: tuple = (1280, 720)) -> None:
-            frame_width, frame_height = resolution
-            # source = source if source != "0" else 0
-            # capture = VideoCapture(source)
-            capture.set(CAP_PROP_FRAME_WIDTH, frame_width)
-            capture.set(CAP_PROP_FRAME_HEIGHT, frame_height)
-
-            while capture.isOpened():
-                success, im0 = capture.read()
-                if not success:
-                    break
-
-                # update the frame in session state
-                updateFrame(im0)
-
-                if waitKey(1) == ord('q'):
-                    break
-
-            capture.release()
-            destroyAllWindows()
+    if runtime.is_active_session(session_id=ctx.session_id):
+        # Session is running
+        thread.start()
+        if status:
+            main(None)
+    else:
+        load_instance().stop_all()
+        print("Session stopped")
+        # Session is not running, Do what you want to do on user exit here
+        return
+    
+if __name__ == "__main__":
+    start_beating(True)

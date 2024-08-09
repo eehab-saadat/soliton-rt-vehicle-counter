@@ -3,6 +3,7 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 from utils.input import on_upload, handle_camera_stream, handle_ip_stream
 from utils.onlycams import list_hot_cameras_on_my_device
+
 def display_option_menu():
     with st.session_state.main_pane[0]:
         # heading
@@ -10,21 +11,20 @@ def display_option_menu():
         # option menu
         if "menu_options" not in st.session_state:
             st.session_state.menu_options = ["Upload", "With IP Address", "Use Camera"]
-        selected = option_menu("Select Video", 
+        st.session_state.selected = option_menu("Select Video", 
                                 options=st.session_state.menu_options,
                                 icons=["upload", "hdd-network", "camera"],
                                 orientation="horizontal",
-                                menu_icon="record-btn")
-        
-        if "option_menu" not in st.session_state:
-            st.session_state.selected = selected
+                                menu_icon="record-btn",
+                                default_index=0 if "selected" not in st.session_state else st.session_state.menu_options.index(st.session_state.selected))
 
          # empty container for input option
         st.session_state.input_option_bucket = st.empty()
-        st.session_state.start_button, st.session_state.download_button = st.columns([1,1], gap="small")
+        st.session_state.start_button, st.session_state.download_button = st.columns([1,1], gap="large")
 
         if st.session_state.selected == "Upload":
             # create and upload file dropbox and opload button
+            print("code entered uploaded")
             uploaded_file =  st.session_state.input_option_bucket.file_uploader(label="Upload Video:hot_pepper:", 
                             type=["mp4", "avi", "mov", "mkv"], 
                             help="Upload a video file. Allowed formats: mp4, avi, mov, mkv",
@@ -37,6 +37,7 @@ def display_option_menu():
             st.session_state.uploaded_file = uploaded_file
 
         elif st.session_state.selected == "With IP Address":
+             print("code enterred ip address")
              IP_address = st.session_state.input_option_bucket.text_input("Enter IP Address", "")
              with st.session_state.start_button:
                 st.session_state.run_stream_button = st.button("Start Streaming", 
@@ -46,6 +47,7 @@ def display_option_menu():
                                             args=(IP_address,))
 
         elif st.session_state.selected == "Use Camera":
+            print("code entered camera")
             # display all available web cams in dropdown
             all_cams = list_hot_cameras_on_my_device()
             st.session_state.selected_cam =  st.session_state.input_option_bucket.selectbox(label="Select camera from the list below",

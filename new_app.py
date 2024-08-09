@@ -1,10 +1,7 @@
 # imports
 import streamlit as st
-from utils.main_layout import handle_show_vid
 from datetime import datetime
 from utils.stats import render_statistics
-from pandas import read_csv, DataFrame
-import cv2
 from components.main_pane import display_option_menu
 from components.active_camera_table import update_model_status_table
 from utils.input import load_instance
@@ -21,7 +18,7 @@ def main(_args):
     page_config = st.set_page_config(
         page_title="Object Counter",
         page_icon="🚗",
-        layout="centered" if "current_layout" not in st.session_state else st.session_state.current_layout,
+        layout="centered",
         initial_sidebar_state="expanded"
     )
 
@@ -31,10 +28,6 @@ def main(_args):
     st.session_state.sources = instance.get_active_sources()
     st.session_state.active_cams_present = True if len(st.session_state.sources) > 0 else False
     print("\n", st.session_state.sources, "\n")
-
-    # defining current layout
-    if "current_layout" not in st.session_state:
-        st.session_state.current_layout = "centered"
 
     if st.session_state.active_cams_present:
         st.session_state.main_pane_cols = 2
@@ -63,7 +56,9 @@ def main(_args):
     # unsafe_allow_html=True,
     # )
 
-    st.session_state.main_pane = st.columns(st.session_state.main_pane_cols)
+    st.session_state.main_pane = st.columns([2, 1] if st.session_state.main_pane_cols == 2 else st.session_state.main_pane_cols, 
+                                            gap="large",
+                                            vertical_alignment="top")
 
 
     if "instance" not in st.session_state:

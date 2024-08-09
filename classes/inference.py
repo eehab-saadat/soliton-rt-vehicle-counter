@@ -29,11 +29,12 @@ class INSTANCE:
         source = 0 if source == "0" else source
 
         kill_dead_threads(self.instances)
+
         if (len(self.instances) >= 5):
             print("Maximum number of instances reached. Please stop some instances before adding new ones.")
             return 1
         
-        if source in list(self.instances.keys()):
+        if str(source) in list(self.instances.keys()):
             print(f"Source {source} already exists in the list of instances.")
             return 2
         
