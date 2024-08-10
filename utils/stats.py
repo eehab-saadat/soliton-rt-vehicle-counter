@@ -36,12 +36,12 @@ def render_statistics():
         st.dataframe(st.session_state.data_for_visualization, use_container_width=True, hide_index=True)
 
     with tabs[1]:
-        
+
         layout = st.columns(2)
 
-        # with layout[0]:
-        #     fig = draw_chart(st.session_state.data_for_visualization, theme)
-        #     st.pyplot(fig)
+        with layout[0]:
+            fig = draw_chart(st.session_state.data_for_visualization, theme)
+            st.pyplot(fig)
 
         with layout[1]:
             st.bar_chart(st.session_state.data_for_visualization, x="class", y="counts")

@@ -13,14 +13,14 @@ def display_option_menu():
         # option menu
         if "menu_options" not in st.session_state:
             st.session_state.menu_options = ["Upload", "With IP Address", "Use Camera"]
-        st.session_state.selected = option_menu("Select Video", 
+        st.session_state.selected = option_menu("Select Video",
                                 options=st.session_state.menu_options,
                                 icons=["upload", "hdd-network", "camera"],
                                 orientation="horizontal",
                                 menu_icon="record-btn",
                                 default_index=0)
 
-         # empty container for input option
+        # empty container for input option
         st.session_state.input_option_bucket = st.empty()
         st.session_state.start_button, st.session_state.download_button = st.columns([1,1], gap="large")
 
@@ -40,24 +40,26 @@ def display_option_menu():
         elif st.session_state.selected == "Upload":
             # create and upload file dropbox and opload button
             uploaded_file =  st.session_state.input_option_bucket.file_uploader(label="Upload Video:hot_pepper:", 
-                            type=["mp4", "avi", "mov", "mkv"], 
+                            type=["mp4", "avi", "mov", "mkv"],
                             help="Upload a video file. Allowed formats: mp4, avi, mov, mkv",
                             accept_multiple_files=False)
             with st.session_state.start_button:
-                st.session_state.upload_button = st.button(label="Upload", 
-                                                        key="upload_btn", 
+                st.session_state.upload_button = st.button(label="Upload Video",
+                                                        key="upload_btn",
                                                         help="Run the model inference and start counting vehicles",
-                                                        on_click=on_upload)
+                                                        on_click=on_upload,
+                                                        use_container_width=True)
             st.session_state.uploaded_file = uploaded_file
 
         elif st.session_state.selected == "With IP Address":
-             IP_address = st.session_state.input_option_bucket.text_input("Enter IP Address", "")
-             with st.session_state.start_button:
-                st.session_state.run_stream_button = st.button("Start Streaming", 
+            IP_address = st.session_state.input_option_bucket.text_input("Enter IP Address", "")
+            with st.session_state.start_button:
+                st.session_state.run_stream_button = st.button("Start Streaming",
                                             help="Run the model inference and start counting vehicles from netwrook camera input",
                                             key="run_ip_cam_btn",
                                             on_click=handle_ip_stream,
-                                            args=(IP_address,))
+                                            args=(IP_address,),
+                                            use_container_width=True)
 
         elif st.session_state.selected == "Use Camera":
             # display all available web cams in dropdown
@@ -65,7 +67,8 @@ def display_option_menu():
             st.session_state.selected_cam =  st.session_state.input_option_bucket.selectbox(label="Select camera from the list below",
                                                         options=list(all_cams.keys()))
             with st.session_state.start_button:
-                st.session_state.run_cam_button = st.button("Open Camera", 
+                st.session_state.run_cam_button = st.button("Open Camera",
                                                             help="Run the model inference and start counting vehicles from selected camera input",
                                                             key="run_cam_btn",
-                                                            on_click=handle_camera_stream)
+                                                            on_click=handle_camera_stream,
+                                                            use_container_width=True)

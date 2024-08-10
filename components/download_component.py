@@ -8,7 +8,7 @@ def file_downloader() -> None:
     filename = st.selectbox(label="Select file to download.", options=listdir("storage"))
 
     with open("storage/"+filename, "r") as file:
-        st.download_button("Download", 
+        st.download_button("Download",
                     data=file,
                     file_name=filename,
                     mime="text/csv")

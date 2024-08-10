@@ -1,15 +1,12 @@
 # imports
 import streamlit as st
-from new_model import MODEL
-from ultralytics import YOLO
-from streamlit_option_menu import option_menu
-from utils.onlycams import list_hot_cameras_on_my_device
-from utils.input import handle_camera_stream, on_upload, handle_ip_stream
-from utils.main_layout import handle_show_vid
 from datetime import datetime
 from utils.stats import render_statistics
-from pandas import read_csv, DataFrame
-import cv2
+from components.main_pane import display_option_menu
+from components.active_camera_table import update_model_status_table
+from utils.input import load_instance
+from classes.inference import kill_dead_threads
+from components.download_component import file_downloader
 
 ## Mounting model
 video_path = r"C:\Users\Fayyez.Farrukh\Documents\NPI\Og videos\002.mp4"
@@ -18,156 +15,61 @@ linear_points = [(500, 450), (500, 1300)]
 
 def main(_args):
 
-    # @st.fragment(run_every=0.05)
-    # def updateFrame(model: MODEL):
-    #     st.session_state.frame_bucket.image(model.read(), channels="BGR")
-
-    def handle_reset():
-        st.session_state.model_mounted = False
-        st.session_state.menu_options = ["Upload", "With IP Address", "Use Camera"]
-        st.session_state.model_instance.stop()
-
     # page configurations
-    initial_layout = "centered"
-    config = st.set_page_config(
+    page_config = st.set_page_config(
         page_title="Object Counter",
         page_icon="🚗",
-        layout=st.session_state.current_layout if "current_layout" in st.session_state else initial_layout
+        layout="centered",
+        initial_sidebar_state="expanded"
     )
 
-    if "model_instance" not in st.session_state:
-        st.session_state.model_instance = MODEL(YOLO("weights/final_openvino_model"))
+    # creating dataframe
+    instance = load_instance()
+    kill_dead_threads(instance.instances) # kill all dead instances if any
+    st.session_state.sources = instance.get_active_sources()
+    st.session_state.active_cams_present = True if len(st.session_state.sources) > 0 else False
 
-    if "current_layout" not in st.session_state:
-        st.session_state.current_layout = initial_layout
-    
-    if "model_mounted" not in st.session_state:
-        st.session_state.model_mounted = False
-
-    # page layout structures / containers
-    if "main_pane" not in st.session_state:
-        st.session_state.main_pane_cols = 1
+    if st.session_state.active_cams_present:
+        st.session_state.main_pane_cols = 2
     else:
-        if st.session_state.display_checkbox:
-            st.session_state.main_pane_cols = 2
-        else:
-            st.session_state.main_pane_cols = 1
+        st.session_state.main_pane_cols = 1
 
+    # title of page
     st.markdown('''<h1 style='text-align: center; color: white; font-style: italic; font-size: 56px; margin:0'>
                     🎁 Autoistics
                 </h1>
-                <h3 style='text-align: center; color: white; font-style: italic; font-size: 24px; margin:0'>
-                    Specially Abled Vehicle Counter
-                </h3>
                 <br>
                 ''', unsafe_allow_html=True)
 
-    st.session_state.main_pane = st.columns(st.session_state.main_pane_cols, vertical_alignment="top", gap='small')
-
-    with st.session_state.main_pane[0]:
-
-        header_row = st.columns(spec=[4,1], gap="small", vertical_alignment="center")
-        with header_row[0]:
-            st.header("Control Panel")
-        with header_row[1]:
-            display_checkbox = st.checkbox(label="Show Video", key="show_vid", on_change=handle_show_vid)
-            st.session_state.display_checkbox = display_checkbox
-        
-        # Option Menu
-        if "menu_options" not in st.session_state:
-            st.session_state.menu_options = ["Upload", "With IP Address", "Use Camera"]
-        selected = option_menu("Select Video", 
-                                options=st.session_state.menu_options,
-                                icons=["upload", "hdd-network", "camera"],
-                                orientation="horizontal",
-                                menu_icon="record-btn")
-        if "option_menu" not in st.session_state:
-            st.session_state.selected = selected
-
-        # empty container for input option
-        st.session_state.input_option_bucket = st.empty()
-        st.session_state.start_button, st.session_state.download_button = st.columns([3, 1], gap="small")
-    
-        if len(st.session_state.menu_options) == 1: # if a model is mounted then show reset button to the user
-            st.write("Model inference is running. Press \"Reset\" button to use another video source.")
-            st.session_state.start_button, st.session_state.download_button = st.columns([3, 1], gap="small")
-            with st.session_state.start_button:
-                st.session_state.run_cam_button = st.button("Reset", 
-                                                            help="reset the model and start over",
-                                                            key="reset_btn",
-                                                            on_click=handle_reset)
-                
-        elif selected == "Upload":
-            uploaded_file =  st.session_state.input_option_bucket.file_uploader(label="Upload Video:hot_pepper:", 
-                            type=["mp4", "avi", "mov", "mkv"], 
-                            help="Upload a video file. Allowed formats: mp4, avi, mov, mkv",
-                            accept_multiple_files=False)
-            with st.session_state.start_button:
-                upload_button = st.button(label="Upload", 
-                                    key="upload_btn", 
-                                    help="Run the model inference and start counting vehicles",
-                                    on_click=on_upload)
-            # add to session dict
-            st.session_state.uploaded_file = uploaded_file
-            
-        elif selected == "With IP Address":
-            st.session_state.input_option_bucket.IP_address = st.session_state.input_option_bucket.text_input("Enter IP Address", "")
-            with st.session_state.start_button:
-                run_stream_button = st.button("Start Streaming", 
-                                            help="Run the model inference and start counting vehicles from netwrook camera input",
-                                            key="run_ip_cam_btn")
-                                            # on_click=lambda: model.count("http://" + IP_address, 1, linear_points)
-
-        elif selected == "Use Camera":
-            # display all available web cams in dropdown
-            all_cams = list_hot_cameras_on_my_device()
-            st.session_state.input_option_bucket.selected_cam =  st.session_state.input_option_bucket.selectbox(label="Select camera from the list below",
-                                                        options=list(all_cams.keys()))
-            with st.session_state.start_button:
-                st.session_state.run_cam_button = st.button("Open Camera", 
-                                                            help="Run the model inference and start counting vehicles from selected camera input",
-                                                            key="run_cam_btn",
-                                                            on_click=handle_camera_stream)
+    st.session_state.main_pane = st.columns([3, 2] if st.session_state.main_pane_cols == 2 else st.session_state.main_pane_cols, 
+                                            gap="large",
+                                            vertical_alignment="top")
 
 
-    # container declaration for video streaming
-    if st.session_state.main_pane_cols == 2:
-          with st.session_state.main_pane[1]:
-            if "frame_bucket" not in st.session_state:
-                st.session_state.frame_bucket_container = st.container()
-                st.session_state.frame_bucket = st.session_state.frame_bucket_container.empty()
-            if not st.session_state.model_mounted:
-                st.session_state.frame_bucket.image(image="assets/placeholder-bg.png")
-    
-    with st.session_state.main_pane[0]:
-        st.write("## Vehicle Count Statistics")
+    if "instance" not in st.session_state:
+        st.session_state.instance = load_instance()
 
-    try:
-    # rendering data vidualization
-        render_statistics()
-    except Exception as e:
-        pass
-    
-    # download button
-    # TODO: manage 
+    # display options menu
+    display_option_menu()
+
+    # creating running cameras summary in table here
+    if st.session_state.active_cams_present:
+        update_model_status_table()
+
+    # downalod button
     with st.session_state.download_button:
-        st.download_button(label="Download Report", 
-                            data=st.session_state.data_for_visualization.to_csv(index=False),
-                            file_name=f"report_{datetime.now().strftime("%y-%m-%d_%H-%M-%S")}.csv",
-                            mime="text/csv",
-                            help="Download the vehicle count report in CSV format")
-    
+        st.button(label="Download Report",
+                help="Download the vehicle count report in CSV format and visualise the data",
+                on_click=file_downloader,
+                use_container_width=True)
+
+    # page footer
     st.markdown("""
     <footer style="text-align:center; padding: 0px; background-color: transparent; bottom: 0; width: 100%; color: white;">
-        <br>© 2024 Autoistics. All rights reserved. Developed by Eehab and Fayyez with love. ✨
+        <br>© 2024 Autoistics. All rights reserved. Developed by Eehab and Fayyez. ✨
     </footer>
     """, unsafe_allow_html=True)
 
-
-    ## page routing
-    # page1 = st.Page("classes/model.py")
-    # router = st.navigation(pages=[page1])
-    # router.run()
 
 if __name__ == "__main__":
     main(None)
