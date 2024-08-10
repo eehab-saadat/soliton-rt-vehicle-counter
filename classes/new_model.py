@@ -13,7 +13,7 @@ class MODEL:
         self.stopped: bool = False
         if self.stream is not None:
             (self.grabbed, self.frame) = self.stream.read()
-        
+
     def __str__(self) -> str:
         return "<class 'MODEL'>"
 
@@ -65,7 +65,7 @@ class MODEL:
 
     def read(self) -> MatLike:
         return self.frame
-    
+
     def stop(self) -> None:
         self.stopped = True
         self.stream.release()

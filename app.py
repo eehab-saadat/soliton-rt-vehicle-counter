@@ -35,14 +35,14 @@ def main(_args):
         st.session_state.main_pane_cols = 1
 
     # title of page
-    st.markdown('''<h1 style='text-align: center; color: white; font-style: italic; font-size: 56px; margin:0'>
+    st.markdown('''<h1 style='text-align: center; font-style: italic; font-size: 56px; margin:0'>
                     🎁 Autoistics
                 </h1>
                 <br>
                 ''', unsafe_allow_html=True)
 
-    st.session_state.main_pane = st.columns([3, 2] if st.session_state.main_pane_cols == 2 else st.session_state.main_pane_cols, 
-                                            gap="large",
+    st.session_state.main_pane = st.columns([3, 2] if st.session_state.main_pane_cols == 2 else st.session_state.main_pane_cols,
+                                            gap="medium",
                                             vertical_alignment="top")
 
 
@@ -65,7 +65,7 @@ def main(_args):
 
     # page footer
     st.markdown("""
-    <footer style="text-align:center; padding: 0px; background-color: transparent; bottom: 0; width: 100%; color: white;">
+    <footer style="text-align:center; padding: 0px; background-color: transparent; bottom: 0; width: 100%;">
         <br>© 2024 Autoistics. All rights reserved. Developed by Eehab and Fayyez. ✨
     </footer>
     """, unsafe_allow_html=True)

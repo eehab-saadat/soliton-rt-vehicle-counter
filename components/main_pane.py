@@ -22,7 +22,7 @@ def display_option_menu():
 
         # empty container for input option
         st.session_state.input_option_bucket = st.empty()
-        st.session_state.start_button, st.session_state.download_button = st.columns([1,1], gap="large")
+        st.session_state.start_button, st.session_state.download_button = st.columns([1,1], gap="medium")
 
         if len(st.session_state.menu_options) == 1:
             # if only one option is present, then display the add more camera option
@@ -34,7 +34,8 @@ def display_option_menu():
                     st.button(label="Add More",
                             key="add_more_btn",
                             help="click this button to add more cameras to the session",
-                            on_click=reset_options)
+                            on_click=reset_options,
+                            type="primary")
                 st.write("You may add upto 5 cameras for counting vehicles simultaneously in one sesssion. Click \"Add More\" below to add more cameras.")
 
         elif st.session_state.selected == "Upload":

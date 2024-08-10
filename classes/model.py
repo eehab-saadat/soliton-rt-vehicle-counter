@@ -26,7 +26,7 @@ def getName(source: str):
 
 class MODEL:
     __model = None
-    
+
     def __init__(self, name: str = "Default") -> None:
         self.name = name
         self.stopped = False
@@ -37,7 +37,7 @@ class MODEL:
             return f"<class 'MODEL':YOLO ({self.name})>"
         else:
             return "<class 'MODEL'>"
-        
+
     def __repr__(self) -> str:
         return self.__str__()
 
@@ -94,7 +94,7 @@ class MODEL:
                 frame_count = 0
                 source = source if source != "0" else 0
                 capture = VideoCapture(source)
-                
+
                 object_counter = ObjectCounter(
                     view_img=show_vid,
                     reg_pts=region_points,
@@ -117,7 +117,6 @@ class MODEL:
 
                     if new_classwise_count != old_classwise_count:
                         self.__dump(new_classwise_count, source)
-                        # self.__clean_count(new_classwise_count, source)
                         old_classwise_count = deepcopy(new_classwise_count)
 
                     frame_count += skip

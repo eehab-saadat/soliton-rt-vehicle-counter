@@ -23,7 +23,7 @@ class INSTANCE:
         returns 0: for successful model upload
 
         returns 1: for MAX model limit reached
-        
+
         returns 2: for source already present in the dictionary
         '''
         source = 0 if source == "0" else source
@@ -33,11 +33,11 @@ class INSTANCE:
         if (len(self.instances) >= 5):
             print("Maximum number of instances reached. Please stop some instances before adding new ones.")
             return 1
-        
+
         if str(source) in list(self.instances.keys()):
             print(f"Source {source} already exists in the list of instances.")
             return 2
-        
+
         thread = Thread(target=model.count, kwargs={"source": source, "show_vid": show_vid})
         thread.start()
         if isinstance(source, int):

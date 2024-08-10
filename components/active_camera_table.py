@@ -36,4 +36,5 @@ def update_model_status_table():
                                                     help="Removes the selected cameras from the active cameras list",
                                                     on_click=handle_remove_camera,
                                                     args=(st.session_state.running_cameras_table[st.session_state.running_cameras_table["Select"]]["Active Sources"].tolist(),),
-                                                    use_container_width=True)
+                                                    use_container_width=True,
+                                                    type="primary")
