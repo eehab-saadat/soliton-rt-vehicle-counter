@@ -5,11 +5,10 @@ from ultralytics.solutions import ObjectCounter
 from cv2 import imshow, waitKey, destroyAllWindows, VideoCapture
 from cv2 import CAP_PROP_POS_FRAMES
 from cv2.typing import MatLike
-from datetime import datetime 
+from datetime import datetime
 from datetime import datetime
 from os.path import exists
 from os import makedirs
-
 
 def getName(source: str):
     if isinstance(source, int):
