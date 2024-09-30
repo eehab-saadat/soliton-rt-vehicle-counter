@@ -3,7 +3,7 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 from utils.input import on_upload, handle_camera_stream, handle_ip_stream, load_instance
 from utils.onlycams import list_hot_cameras_on_my_device
-
+from utils.deleteFiles import delete_all_reports
 def reset_options():
     st.session_state.menu_options = ["Upload", "With IP Address", "Use Camera"]
 
@@ -78,3 +78,10 @@ def display_option_menu():
                                                             key="run_cam_btn",
                                                             on_click=handle_camera_stream,
                                                             use_container_width=True)
+        # delete all the csv files in the storage folder
+        st.button("🗑️ Delete All Reports",
+                on_click=delete_all_reports,
+                type="primary",
+                help="Warning: This button will delete all the reports generated till now.",
+                use_container_width=True,
+                key="delete_all_reports_btn")

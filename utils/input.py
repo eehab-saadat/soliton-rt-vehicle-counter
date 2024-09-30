@@ -29,7 +29,7 @@ def add_model_to_instance(source: str, weights: str = "weights/final.pt"):
         cap = VideoCapture(source)
         if not cap.isOpened():
             # if video cpture object cannot be created
-            showDialogBox(heading="Error 03: Invalid Sideo Source",
+            showDialogBox(heading="Error 03: Invalid Video Source",
                         message="The source of video given could not be loaded due to corrupt file, unstable connection or incorrect IP address")
             return
         else:
@@ -44,7 +44,7 @@ def add_model_to_instance(source: str, weights: str = "weights/final.pt"):
     if response == 0:
         return True # true for successful execution of add camera to instance
     elif response == 1:
-        showDialogBox(heading="Error 01: Camera Limit Reached", 
+        showDialogBox(heading="Error 01: Camera Limit Reached",
                     message="Only 5 cameras can be added at a time. Kindly remove active cameras before adding new cameras.")
     elif response == 2:
         showDialogBox(heading="Error 02: Camera Duplication",
